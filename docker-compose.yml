@@ -157,7 +157,7 @@ services:
       - DISCORD_TOKEN=${DISCORD_TOKEN:?DISCORD_TOKEN is required, set it in .env}
     volumes:
       - ./discord:/app/discord
-    command: sh -c "pip install --no-cache-dir discord.py requests && python /app/data/discord_bot.py"
+    command: sh -c "pip install --no-cache-dir discord.py requests && python /app/discord/discord_bot.py"
 
 volumes:
   searxng-data:
