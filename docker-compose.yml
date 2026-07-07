@@ -155,6 +155,8 @@ services:
       - odysseus
     environment:
       - DISCORD_TOKEN=${DISCORD_TOKEN:?DISCORD_TOKEN is required, set it in .env}
+      - ODYSSEUS_ADMIN_USER=${ODYSSEUS_ADMIN_USER:-admin}
+      - ODYSSEUS_ADMIN_PASSWORD=${ODYSSEUS_ADMIN_PASSWORD:?ODYSSEUS_ADMIN_PASSWORD is required}
     volumes:
       - ./discord:/app/discord
     command: sh -c "pip install --no-cache-dir discord.py requests && python /app/discord/discord_bot.py"
