@@ -148,6 +148,17 @@ services:
       - NTFY_BASE_URL=${NTFY_BASE_URL:-http://localhost:8091}
     restart: unless-stopped
 
+  discord-bot:
+    image: python:3.11-slim
+    restart: always
+    depends_on:
+      - odysseus
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN:?DISCORD_TOKEN is required, set it in .env}
+    volumes:
+      - ${APP_DATA_DIR:-./data}:/app/data
+    command: sh -c "pip install --no-cache-dir discord.py requests && python /app/data/discord_bot.py"
+
 volumes:
   searxng-data:
   chromadb-data:
