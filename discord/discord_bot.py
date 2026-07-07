@@ -8,7 +8,7 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 ODYSSEUS_ADMIN_USER = os.getenv("ODYSSEUS_ADMIN_USER", "admin")
 ODYSSEUS_ADMIN_PASSWORD = os.getenv("ODYSSEUS_ADMIN_PASSWORD")
 BASE_URL = "http://odysseus:7000"
-ENDPOINT_ID = "f9f3acbe"
+ENDPOINT_URL = "http://192.168.1.55:11434/v1/chat/completions"
 MODEL = "qwen-agent:latest"
 CHANNEL_ID = 1515647781786877952
 
@@ -24,20 +24,28 @@ session = requests.Session()
 user_sessions = {}
 
 def login():
-    try:
-        r = session.post(
-            f"{BASE_URL}/api/auth/login",
-            json={"username": ODYSSEUS_ADMIN_USER, "password": ODYSSEUS_ADMIN_PASSWORD, "remember": True},
-        )
-        if r.status_code != 200:
-            logger.error(f"Login failed with status {r.status_code}")
-        else:
-            logger.info("Login succeeded")
-    except Exception:
-        logger.exception("Login request failed")
+    for attempt in range(10):
+        try:
+            r = session.post(
+                f"{BASE_URL}/api/auth/login",
+                json={"username": ODYSSEUS_ADMIN_USER, "password": ODYSSEUS_ADMIN_PASSWORD, "remember": True},
+            )
+            if r.status_code == 200:
+                logger.info("Login succeeded")
+                return
+            logger.error(f"Login failed with status {r.status_code}: {r.text[:200]}")
+        except requests.exceptions.RequestException:
+            logger.warning(f"Login attempt {attempt + 1}/10 failed, odysseus may not be ready yet")
+        import time
+        time.sleep(3)
+    logger.error("Login failed after all retries — bot will not be authenticated")
 
 def new_chat():
-    r = session.post(f"{BASE_URL}/api/session", data={"name":"Discord","endpoint_id":ENDPOINT_ID,"model":MODEL})
+    r = session.post(f"{BASE_URL}/api/session", data={
+        "name": "Discord",
+        "endpoint_url": ENDPOINT_URL,
+        "model": MODEL,
+    })
     r.raise_for_status()
     return r.json()["id"]
 
